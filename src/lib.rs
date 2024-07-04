@@ -46,7 +46,20 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     // 'a is the explicit lifetime
     // data returned by search will live
     // as long as the data passed by contents
-    vec![]
+    let mut results = Vec::new();
+    for line in contents.lines() {
+        // lines is built in
+        // method that handles line-by-line iter of strings
+
+        if line.contains(query) {
+            // contains is built in
+            // checks if a string contains something
+
+            results.push(line);
+        }
+    }
+
+    results
 }
 
 // in rust we add tests underneath the file we want to test
