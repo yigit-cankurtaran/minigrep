@@ -1,3 +1,4 @@
+use std::env;
 use std::error::Error;
 use std::fs;
 
@@ -7,6 +8,7 @@ pub struct Config {
     pub query: String,
     pub file_path: String,
     // the fields are public
+    pub ignore_case: bool,
 }
 
 impl Config {
@@ -22,7 +24,15 @@ impl Config {
         // we're cloning the values because we want to own them
         // we don't want to take ownership of the values
 
-        Ok(Config { query, file_path })
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+        // the command is IGNORE_CASE=1 cargo run -- to poem.txt
+        // to run case insensitive
+
+        Ok(Config {
+            query,
+            file_path,
+            ignore_case,
+        })
     }
 }
 
@@ -34,7 +44,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // read the file and save it to the contents variable
     // ? returns the error value from the current function for the caller to handle
 
-    for line in search(&config.query, &contents) {
+    let results = if config.ignore_case {
+        search_case_insensitive(&config.query, &contents)
+    } else {
+        search(&config.query, &contents)
+    };
+
+    for line in results {
         println!("{line}");
     }
     Ok(())
@@ -63,6 +79,23 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     results
 }
 
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    // why do we use & here idk
+    // TODO: look this up
+    let query = query.to_lowercase();
+    // to_lowercase is built in
+    // self explanatory
+    // creates new data instead of referencing existing data
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.to_lowercase().contains(&query) {
+            results.push(line);
+        }
+    }
+    results
+}
+
 // in rust we add tests underneath the file we want to test
 #[cfg(test)]
 mod tests {
@@ -71,15 +104,31 @@ mod tests {
     // so we can access the functions and structs
 
     #[test]
-    fn one_result() {
+    fn case_sensitive() {
         let query = "duct";
         let contents = "\
 Rust:
 safe, fast, productive.
-Pick three.";
+Pick three.
+Duct tape.";
         // the contents of the file
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));
         // assert_eq! is a macro that compares the two values
         // if they're not equal, it will panic
+    }
+
+    #[test]
+    fn case_insensitive() {
+        let query = "rUsT";
+        let contents = "\
+        Rust:
+        safe, fast, productive,
+        Pick three.
+        Trust me.";
+
+        assert_eq!(
+            vec!["Rust:", "Trust me."],
+            search_case_insensitive(query, contents)
+        )
     }
 }
