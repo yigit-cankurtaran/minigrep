@@ -34,8 +34,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // read the file and save it to the contents variable
     // ? returns the error value from the current function for the caller to handle
 
-    println!("With text:\n{}", contents);
-    // print the contents of the file
+    for line in search(&config.query, &contents) {
+        println!("{line}");
+    }
     Ok(())
     // return an Ok value
     // indicates we're not returning a value
