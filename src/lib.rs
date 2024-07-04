@@ -41,3 +41,31 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // indicates we're not returning a value
     // we're just running for the side effects
 }
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    // 'a is the explicit lifetime
+    // data returned by search will live
+    // as long as the data passed by contents
+    vec![]
+}
+
+// in rust we add tests underneath the file we want to test
+#[cfg(test)]
+mod tests {
+    use super::*;
+    // bring the parent module into scope
+    // so we can access the functions and structs
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+        // the contents of the file
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+        // assert_eq! is a macro that compares the two values
+        // if they're not equal, it will panic
+    }
+}
