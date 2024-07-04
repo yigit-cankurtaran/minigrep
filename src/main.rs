@@ -10,7 +10,8 @@ fn main() {
         // unwrap_or_else is a method that handles errors
         // if the result is an error, it will run the closure
         // if the result is Ok, it will return the value
-        println!("Problem parsing arguments: {}", err);
+        eprintln!("Problem parsing arguments: {}", err);
+        // standard library that prints to the standard error stream
         std::process::exit(1);
     });
 
@@ -21,7 +22,9 @@ fn main() {
 
     if let Err(e) = minigrep::run(config) {
         // if the run function returns an error
-        println!("Application error: {}", e);
+        eprintln!("Application error: {}", e);
+        // eprintln for error again
+        // to print to the standard error stream
         std::process::exit(1);
         // exit the program with an error code
     }
